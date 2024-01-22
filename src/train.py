@@ -129,7 +129,7 @@ def train(cfg):
 
     # Plot results
     plot_losses(results["train_losses"], results["val_losses"], os.path.join(output_dir, "losses.png"))
-    plot_accuracies(results["val_top1_accuracies"], os.path.join(output_dir, "accuracies.png"))
+    plot_accuracies(results["top1_accuracies"], os.path.join(output_dir, "accuracies.png"))
 
     # Test
     max_top1 = max(results["top1_accuracies"])
