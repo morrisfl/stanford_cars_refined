@@ -88,7 +88,7 @@ def train(cfg):
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(model.img_size, model.img_size),
+        transforms.Resize((model.img_size, model.img_size)),
         transforms.ToTensor(),
         transforms.Normalize(model.mean, model.std)
     ])
@@ -124,8 +124,8 @@ def train(cfg):
 
     # Training
     results = train_and_evaluate_model(model, cfg["train_style"], train_loader, val_loader, criterion, optimizer,
-                                       cfg["epochs"], device, output_dir, scheduler, cfg["warmup_steps"],
-                                       cfg["warmup_factor"])
+                                       cfg["epochs"], cfg["lp_epochs"], device, output_dir, scheduler,
+                                       cfg["warmup_steps"], cfg["warmup_factor"])
 
     # Plot results
     plot_losses(results["train_losses"], results["val_losses"], os.path.join(output_dir, "losses.png"))
