@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SCrefined"
+version = "0.0.1"
+authors = [{ name="Morris Florek", email="morris.benedikt.florek@uni-weimar.de" },]
+description = "A library for training and evaluating a model for vehicle color recognition."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "matplotlib",
+    "timm",
+    "tqdm",
+]
