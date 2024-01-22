@@ -38,6 +38,7 @@ class ConvNeXtB(nn.Module):
         in_feats = self.model.classifier[2].in_features
         self.model.classifier[2] = nn.Linear(in_feats, num_classes)
 
+        self.img_size = 224
         self.mean = [0.485, 0.456, 0.406]
         self.std = [0.229, 0.224, 0.225]
 
