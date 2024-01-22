@@ -18,7 +18,6 @@ def parse_args():
     parser.add_argument("data_root", help="Path to the data directory.")
     parser.add_argument("--output_dir", default="results/", help="Path to the output directory.")
     parser.add_argument("--batch_size", default=64, help="Batch size.")
-    parser.add_argument("--num_workers", default=4, help="Number of workers for data loading.")
     parser.add_argument("--train_style", default="lp", choices=["lp", "ft", "lp-ft"],
                         help="How to train the model, linear probing (lp), fine-tuning (ft), or both (lp-ft).")
     parser.add_argument("--lp_epochs", default=None, help="Number of linear probing epochs if train_style is lp-ft.")
@@ -42,7 +41,6 @@ def main():
         "data_root": args.data_root,
         "output_dir": args.output_dir,
         "batch_size": args.batch_size,
-        "num_workers": args.num_workers,
         "train_style": args.train_style,
         "lp_epochs": args.lp_epochs,
         "epochs": args.epochs,
@@ -104,9 +102,9 @@ def train(cfg):
     test_dataset = VCoRDataset(os.path.join(cfg["data_root"], "test"), transform=test_transform,
                                excluded_cls=excluded_cls)
 
-    train_loader = DataLoader(train_dataset, batch_size=cfg["batch_size"], shuffle=True, num_workers=cfg["num_workers"])
-    val_loader = DataLoader(val_dataset, batch_size=cfg["batch_size"], shuffle=False, num_workers=cfg["num_workers"])
-    test_loader = DataLoader(test_dataset, batch_size=cfg["batch_size"], shuffle=False, num_workers=cfg["num_workers"])
+    train_loader = DataLoader(train_dataset, batch_size=cfg["batch_size"], shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=cfg["batch_size"], shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=cfg["batch_size"], shuffle=False)
 
     # Loss
     criterion = nn.CrossEntropyLoss()
