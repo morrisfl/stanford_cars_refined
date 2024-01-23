@@ -8,13 +8,14 @@ from torchvision.transforms import transforms
 from tqdm import tqdm
 
 from src.dataset import VCoRDataset
-from src.model import ConvNeXtB, ViTB16
+from src.model import ConvNeXtB, ViTB16, CLIPConvNeXtB
 from src.utils import plot_losses, plot_accuracies
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train classification model.")
-    parser.add_argument("mode_name", choices=["convnext", "dinov2", "siglip"], help="Name of the model to train.")
+    parser.add_argument("mode_name", choices=["convnext", "clip-convnext", "dinov2", "siglip"],
+                        help="Name of the model to train.")
     parser.add_argument("data_root", help="Path to the data directory.")
     parser.add_argument("--output_dir", default="results/", help="Path to the output directory.")
     parser.add_argument("--batch_size", default=64, help="Batch size.")
@@ -66,6 +67,8 @@ def train(cfg):
     # Model
     if cfg["model_name"] == "convnext":
         model = ConvNeXtB(num_classes=10)
+    elif cfg["model_name"] == "clip-convnext":
+        model = CLIPConvNeXtB(num_classes=10)
     elif cfg["model_name"] == "dinov2":
         model = ViTB16(model_name="vit_base_patch14_dinov2.lvd142m", num_classes=10)
     elif cfg["model_name"] == "siglip":
