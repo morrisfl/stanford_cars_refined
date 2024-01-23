@@ -123,7 +123,10 @@ def train(cfg):
         raise NotImplementedError(f"Unsupported optimizer: {cfg['optimizer']}")
 
     # Scheduler
-    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=cfg["scheduler_steps"], gamma=0.1)
+    if cfg["scheduler_steps"] is None:
+        scheduler = None
+    else:
+        scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=cfg["scheduler_steps"], gamma=0.1)
 
     # Training
     results = train_and_evaluate_model(model, cfg["train_style"], train_loader, val_loader, criterion, optimizer,
