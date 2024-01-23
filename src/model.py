@@ -1,3 +1,4 @@
+import open_clip
 import timm
 from torch import nn
 from torchvision.models import convnext_base
@@ -49,6 +50,31 @@ class ConvNeXtB(nn.Module):
     def freeze_backbone(self):
         for name, param in self.model.named_parameters():
             if 'classifier' not in name:
+                param.requires_grad = False
+
+    def unfreeze_backbone(self):
+        for param in self.model.parameters():
+            param.requires_grad = True
+
+
+class CLIPConvNeXtB(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        model, train_transform, _ = open_clip.create_model_and_transforms("convnext_base_w", "laion2b_s13b_b82k_augreg")
+        self.model = model.visual
+        self.model.head.proj.out_features = num_classes
+
+        self.img_size = self.model.image_size
+        self.mean = self.model.image_mean
+        self.std = self.model.image_std
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
+
+    def freeze_backbone(self):
+        for name, param in self.model.named_parameters():
+            if 'head' not in name:
                 param.requires_grad = False
 
     def unfreeze_backbone(self):

@@ -16,6 +16,8 @@ classifiers = [
 ]
 dependencies = [
     "matplotlib",
+    "open_clip_torch",
+    "pandas",
     "timm",
     "tqdm",
 ]
