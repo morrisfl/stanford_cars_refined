@@ -64,7 +64,7 @@ class CLIPConvNeXtB(nn.Module):
         self.model = model.visual
         self.model.head.proj.out_features = num_classes
 
-        self.img_size = self.model.image_size
+        self.img_size = self.model.image_size[-1]
         self.mean = self.model.image_mean
         self.std = self.model.image_std
 
