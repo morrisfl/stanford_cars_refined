@@ -26,6 +26,7 @@ def parse_args():
     parser.add_argument("--optimizer", default="adam", choices=["adam", "adamw", "sgd"], type=str,
                         help="Optimizer to use.")
     parser.add_argument("--lr", default=1e-3, help="Learning rate.")
+    parser.add_argument("--ft_lr_factor", default=1e-2, help="Fine-tuning learning rate factor.")
     parser.add_argument("--weight_decay", default=1e-4, help="Weight decay.")
     parser.add_argument("--scheduler_steps", default=[6, 8], nargs="+", help="Scheduler steps.")
     parser.add_argument("--warmup_steps", default=114, help="Number of warmup steps.")
@@ -47,6 +48,7 @@ def main():
         "epochs": args.epochs,
         "optimizer": args.optimizer,
         "lr": args.lr,
+        "ft_lr_factor": args.ft_lr_factor,
         "weight_decay": args.weight_decay,
         "scheduler_steps": args.scheduler_steps,
         "warmup_steps": args.warmup_steps,
@@ -129,9 +131,8 @@ def train(cfg):
         scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=cfg["scheduler_steps"], gamma=0.1)
 
     # Training
-    results = train_and_evaluate_model(model, cfg["train_style"], train_loader, val_loader, criterion, optimizer,
-                                       cfg["epochs"], cfg["lp_epochs"], device, output_dir, scheduler,
-                                       cfg["warmup_steps"], cfg["warmup_factor"])
+    results = train_and_evaluate_model(cfg, model, train_loader, val_loader, criterion, optimizer, device, output_dir,
+                                       scheduler)
 
     # Plot results
     plot_losses(results["train_losses"], results["val_losses"], os.path.join(output_dir, "losses.png"))
@@ -145,16 +146,16 @@ def train(cfg):
     test_model(model_path, test_loader, device)
 
 
-def train_and_evaluate_model(model, train_style, train_loader, val_loader, criterion, optimizer, num_epochs, lp_epochs,
-                             device, output_dir, scheduler=None, warmup_steps=None, warmup_factor=None):
+def train_and_evaluate_model(cfg, model, train_loader, val_loader, criterion, optimizer, device, output_dir,
+                             scheduler=None):
     train_losses = []
     val_losses = []
     val_top1_accuracies = []
     model.to(device)
 
-    for epoch in range(num_epochs):
-        train_loss = train_one_epoch(model, train_loader, criterion, optimizer, device, epoch, warmup_steps,
-                                     warmup_factor)
+    for epoch in range(cfg["epochs"]):
+        train_loss = train_one_epoch(model, train_loader, criterion, optimizer, device, epoch, cfg["warmup_steps"],
+                                     cfg["warmup_factor"])
         val_loss, val_top1_accuracy = evaluate_one_epoch(model, val_loader, criterion, device, epoch)
 
         model_scripted = torch.jit.script(model)
@@ -167,12 +168,15 @@ def train_and_evaluate_model(model, train_style, train_loader, val_loader, crite
         if scheduler:
             scheduler.step()
 
-        if train_style == "lp-ft":
-            if lp_epochs < epoch + 1:
+        if cfg["train_style"] == "lp-ft":
+            if cfg["lp_epochs"] < epoch + 1:
+                cfg["train_style"] = "ft"
                 model.unfreeze_backbone()
-                train_style = "ft"
+                lr = cfg["lr"] * cfg["ft_lr_factor"]
+                for param_group in optimizer.param_groups:
+                    param_group["lr"] = lr
 
-        print(f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, "
+        print(f"Epoch {epoch + 1}/{cfg['epochs']}, Train Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}, "
               f"Validation Top-1 Accuracy: {val_top1_accuracy:.4f}")
 
     train_results = {
