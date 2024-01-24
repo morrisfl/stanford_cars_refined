@@ -1,4 +1,5 @@
 import argparse
+import math
 import os.path
 
 import torch
@@ -26,10 +27,11 @@ def parse_args():
     parser.add_argument("--optimizer", default="adam", choices=["adam", "adamw", "sgd"], type=str,
                         help="Optimizer to use.")
     parser.add_argument("--lr", default=1e-3, help="Learning rate.")
-    parser.add_argument("--ft_lr_factor", default=1e-2, help="Fine-tuning learning rate factor.")
+    parser.add_argument("--ft_lr_factor", default=0.0, help="Fine-tuning learning rate factor for lp-ft.")
     parser.add_argument("--weight_decay", default=1e-4, help="Weight decay.")
-    parser.add_argument("--scheduler_steps", default=[6, 8], nargs="+", help="Scheduler steps.")
-    parser.add_argument("--warmup_steps", default=114, help="Number of warmup steps.")
+    parser.add_argument("--scheduler", default="cosine", help="Scheduler to use.")
+    parser.add_argument("--min_lr", default=1e-4, help="Minimum learning rate for cosine scheduler.")
+    parser.add_argument("--warmup_steps", default=82, help="Number of warmup steps.")
     parser.add_argument("--warmup_factor", default=0.1, help="Warmup factor.")
 
     return parser.parse_args()
@@ -125,10 +127,12 @@ def train(cfg):
         raise NotImplementedError(f"Unsupported optimizer: {cfg['optimizer']}")
 
     # Scheduler
-    if cfg["scheduler_steps"] is None:
+    if cfg["scheduler"] == "cosine":
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg["epochs"], eta_min=cfg["min_lr"])
+    elif cfg["scheduler"] is None:
         scheduler = None
     else:
-        scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=cfg["scheduler_steps"], gamma=0.1)
+        raise NotImplementedError(f"Unsupported scheduler: {cfg['scheduler']}")
 
     # Training
     results = train_and_evaluate_model(cfg, model, train_loader, val_loader, criterion, optimizer, device, output_dir,
@@ -169,7 +173,7 @@ def train_and_evaluate_model(cfg, model, train_loader, val_loader, criterion, op
             scheduler.step()
 
         if cfg["train_style"] == "lp-ft":
-            if cfg["lp_epochs"] < epoch + 1:
+            if cfg["lp_epochs"] <= epoch + 1:
                 cfg["train_style"] = "ft"
                 model.unfreeze_backbone()
                 lr = cfg["lr"] * cfg["ft_lr_factor"]
