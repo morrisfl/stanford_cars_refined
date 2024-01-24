@@ -105,6 +105,7 @@ python src/train.py siglip <data_dir> \
 | CLIP ConvNeXt-B | LAION-2B             |       0.9173        |    0.9167     |
 | ConvNeXt-B      | ImageNet-1k          |       0.8419        |    0.8308     |
 | EfficientNet-B1 | ImageNet-1k          |       0.7170        |    0.6580     |
+
 **Table 1:** *Linear probing results on the VCoR [2] dataset.*
 
 ### Fine-tuning (FT)
