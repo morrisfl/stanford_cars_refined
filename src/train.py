@@ -9,7 +9,7 @@ from torchvision.transforms import transforms
 from tqdm import tqdm
 
 from src.dataset import VCoRDataset
-from src.model import ConvNeXtB, ViTB16, CLIPConvNeXtB
+from src.model import ConvNeXtB, ViTB16, CLIPConvNeXtB, EfficientNetB1
 from src.utils import plot_losses, plot_accuracies
 
 
@@ -72,6 +72,8 @@ def train(cfg):
     # Model
     if cfg["model_name"] == "convnext":
         model = ConvNeXtB(num_classes=10)
+    elif cfg["model_name"] == "efficientnet":
+        model = EfficientNetB1(num_classes=10)
     elif cfg["model_name"] == "clip-convnext":
         model = CLIPConvNeXtB(num_classes=10)
     elif cfg["model_name"] == "dinov2":
