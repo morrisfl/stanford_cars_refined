@@ -15,7 +15,7 @@ from src.utils import plot_losses, plot_accuracies
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train classification model.")
-    parser.add_argument("mode_name", choices=["convnext", "clip-convnext", "dinov2", "siglip"],
+    parser.add_argument("mode_name", choices=["convnext", "efficientnet", "clip-convnext", "dinov2", "siglip"],
                         help="Name of the model to train.")
     parser.add_argument("data_root", help="Path to the data directory.")
     parser.add_argument("--output_dir", default="results/", help="Path to the output directory.")
@@ -52,7 +52,8 @@ def main():
         "lr": args.lr,
         "ft_lr_factor": args.ft_lr_factor,
         "weight_decay": args.weight_decay,
-        "scheduler_steps": args.scheduler_steps,
+        "scheduler": args.scheduler,
+        "min_lr": args.min_lr,
         "warmup_steps": args.warmup_steps,
         "warmup_factor": args.warmup_factor
     }

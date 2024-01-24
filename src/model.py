@@ -1,7 +1,7 @@
 import open_clip
 import timm
 from torch import nn
-from torchvision.models import convnext_base
+from torchvision.models import convnext_base, efficientnet_b1
 
 
 class ViTB16(nn.Module):
@@ -82,6 +82,30 @@ class CLIPConvNeXtB(nn.Module):
             param.requires_grad = True
 
 
+class EfficientNetB1(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = efficientnet_b1(weights="IMAGENET1K_V2")
+        in_feats = self.model.classifier[1].in_features
+        self.model.classifier[1] = nn.Linear(in_feats, num_classes)
+
+        self.img_size = 224
+        self.mean = [0.485, 0.456, 0.406]
+        self.std = [0.229, 0.224, 0.225]
+
+    def forward(self, x):
+        x = self.model(x)
+        return x
+
+    def freeze_backbone(self):
+        for name, param in self.model.named_parameters():
+            if 'classifier' not in name:
+                param.requires_grad = False
+
+    def unfreeze_backbone(self):
+        for param in self.model.parameters():
+            param.requires_grad = True
+
+
 if __name__ == "__main__":
     pass
-
