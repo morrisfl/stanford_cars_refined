@@ -146,12 +146,11 @@ def train(cfg):
     plot_accuracies(results["top1_accuracies"], os.path.join(output_dir, "accuracies.png"))
 
     # Test
-    max_top1 = max(results["top1_accuracies"])
-    test_epoch = results["top1_accuracies"].index(max_top1) + 1
-    print(f"Test epoch: {test_epoch}")
-    model_path = os.path.join(output_dir, f"model_epoch{test_epoch}.pt")
-
-    test_model(model_path, test_loader, device)
+    test_epochs = get_test_epochs(results)
+    for test_epoch in test_epochs:
+        print(f"Test epoch: {test_epoch}")
+        model_path = os.path.join(output_dir, f"model_epoch{test_epoch}.pt")
+        test_model(model_path, test_loader, device)
 
 
 def train_and_evaluate_model(cfg, model, train_loader, val_loader, criterion, optimizer, device, output_dir,
@@ -265,6 +264,24 @@ def test_model(model_path, dataloader, device):
 
     top1_accuracy = top1_correct / total
     print(f"Test Top-1 Accuracy: {top1_accuracy:.4f}")
+
+
+def get_test_epochs(results):
+    best_epoch = 0
+    of_epoch = 0
+    best_accuracy = 0.0
+    of_accuracy = 0.0
+    for epoch, result in enumerate(zip(results["top1_accuracies"], results["train_losses"], results["val_losses"])):
+        top1_accuracy, train_loss, val_loss = result
+        if top1_accuracy > best_accuracy:
+            best_accuracy = top1_accuracy
+            best_epoch = epoch + 1
+
+        if top1_accuracy > of_accuracy and train_loss > val_loss:
+            of_accuracy = top1_accuracy
+            of_epoch = epoch + 1
+
+    return [best_epoch, of_epoch]
 
 
 if __name__ == "__main__":
