@@ -127,6 +127,11 @@ python src/train.py siglip <data_dir> \
 
 | Model           | Pre-training dataset | `lr` | `min_lr` | Validation Accuracy | Test Accuracy |
 |-----------------|----------------------|:----:|:--------:|:-------------------:|:-------------:|
+| SigLIP ViT-B/16 | WebLI                | 1e-5 |   1e-6   |       0.9434        |    0.9400     |
+| DINOv2 ViT-B/16 | LVD-142M             | 1e-5 |   1e-6   |       0.9389        |    0.9194     |
+| CLIP ConvNeXt-B | LAION-2B             | 1e-5 |   1e-6   |       0.9452        |    0.9355     |
+| ConvNeXt-B      | ImageNet-1k          | 1e-4 |   1e-5   |       0.9470        |    0.9329     |
+| EfficientNet-B1 | ImageNet-1k          | 1e-3 |   1e-4   |       0.9263        |    0.8926     |
 
 **Table 2:** *Fine-tuning results on the VCoR [2] dataset.*
 
