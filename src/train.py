@@ -148,6 +148,7 @@ def train(cfg):
     # Test
     max_top1 = max(results["top1_accuracies"])
     test_epoch = results["top1_accuracies"].index(max_top1) + 1
+    print(f"Test epoch: {test_epoch}")
     model_path = os.path.join(output_dir, f"model_epoch{test_epoch}.pt")
 
     test_model(model_path, test_loader, device)
