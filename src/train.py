@@ -176,10 +176,12 @@ def train_and_evaluate_model(cfg, model, train_loader, val_loader, criterion, op
             scheduler.step()
 
         if cfg["train_style"] == "lp-ft":
-            if cfg["lp_epochs"] <= epoch + 1:
+            if cfg["lp_epochs"] == epoch + 1:
                 cfg["train_style"] = "ft"
                 model.unfreeze_backbone()
                 lr = cfg["lr"] * cfg["ft_lr_factor"]
+                min_lr = cfg["min_lr"] * cfg["ft_lr_factor"]
+                scheduler.eta_min = min_lr
                 for param_group in optimizer.param_groups:
                     param_group["lr"] = lr
 
