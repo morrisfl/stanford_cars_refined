@@ -38,7 +38,7 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
     img_transform = transforms.Compose([
         transforms.Resize((model.img_size, model.img_size)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=model.img_mean, std=model.img_std)
+        transforms.Normalize(mean=model.mean, std=model.std)
     ])
 
     # Load labels
@@ -47,7 +47,7 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
     # Refine labels
     for i, row in tqdm(df.iterrows()):
         img_path = os.path.join(train_img_dir, row["image"])
-        cls_label = row["Label"]
+        cls_label = row["Class"]
 
         try:
             img = Image.open(img_path)
@@ -59,7 +59,7 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
             continue
 
         instance_cls = f"{cls_label}_{color}"
-        df.at[i, "Label"] = instance_cls
+        df.at[i, "Class"] = instance_cls
 
     df.to_csv(refined_label_path, index=False)
 
@@ -69,5 +69,9 @@ def get_color_prediction(input_img, classifier, transform, device):
     output = classifier(input_tensor.to(device))
     _, pred = torch.max(output, 1)
     return pred.item()
+
+
+if __name__ == "__main__":
+    main()
 
 
