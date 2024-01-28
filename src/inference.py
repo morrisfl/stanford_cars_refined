@@ -44,6 +44,9 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
     # Load labels
     df = pd.read_csv(label_path)
 
+    # Add a column for probability
+    df["Probability"] = [None] * len(df)
+
     # Refine labels
     for i, row in tqdm(df.iterrows()):
         img_path = os.path.join(train_img_dir, row["image"])
@@ -51,7 +54,7 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
 
         try:
             img = Image.open(img_path)
-            color = get_color_prediction(img, model, img_transform, device)
+            color, probability = get_color_prediction(img, model, img_transform, device)
         except Exception as e:
             print(f"Error: {e}")
             print(f"Not able to predict car color for: {os.path.basename(img_path)}")
@@ -60,15 +63,20 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
 
         instance_cls = f"{cls_label}_{color}"
         df.at[i, "Class"] = instance_cls
+        df.at[i, "Probability"] = probability
 
     df.to_csv(refined_label_path, index=False)
 
 
 def get_color_prediction(input_img, classifier, transform, device):
     input_tensor = transform(input_img).unsqueeze(0)
-    output = classifier(input_tensor.to(device))
+    with torch.no_grad():
+        output = classifier(input_tensor.to(device))
+
+    probabilities = torch.nn.functional.softmax(output[0], dim=0).cpu().numpy()
     _, pred = torch.max(output, 1)
-    return pred.item()
+    pred_cls = pred.item()
+    return pred_cls, probabilities[pred_cls]
 
 
 if __name__ == "__main__":
