@@ -58,24 +58,30 @@ class ConvNeXtB(nn.Module):
 
 
 class CLIPConvNeXtB(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, dropout=0.0):
         super().__init__()
         model, train_transform, _ = open_clip.create_model_and_transforms("convnext_base_w", "laion2b_s13b_b82k_augreg")
         self.model = model.visual
-        self.model.head.proj.out_features = num_classes
+        self.model.head = nn.Identity()
+        self.embedding_dim = self.model.trunk.num_features
+
+        self.head = nn.Sequential(
+            nn.Dropout(p=dropout),
+            nn.Linear(self.embedding_dim, num_classes),
+        )
 
         self.img_size = self.model.image_size[-1]
         self.mean = self.model.image_mean
         self.std = self.model.image_std
 
     def forward(self, x):
-        x = self.model(x)
-        return x
+        embeddings = self.model(x)
+        logits = self.head(embeddings)
+        return logits
 
     def freeze_backbone(self):
-        for name, param in self.model.named_parameters():
-            if 'head' not in name:
-                param.requires_grad = False
+        for param in self.model.parameters():
+            param.requires_grad = False
 
     def unfreeze_backbone(self):
         for param in self.model.parameters():
