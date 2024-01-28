@@ -55,6 +55,7 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
 
         try:
             img = Image.open(img_path)
+            img = img.crop((row["x1"], row["y1"], row["x2"], row["y2"]))
             color, probability = get_color_prediction(img, model, img_transform, device)
         except Exception as e:
             print(f"Error: {e}")
