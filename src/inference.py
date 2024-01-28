@@ -43,6 +43,7 @@ def refine(train_img_dir, label_path, refined_label_path, model_path):
 
     # Load labels
     df = pd.read_csv(label_path)
+    df = df.drop("Unnamed: 0", axis=1)
 
     # Add a column for probability
     df["Probability"] = [None] * len(df)
