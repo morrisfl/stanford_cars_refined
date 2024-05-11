@@ -5,7 +5,7 @@ belong to the same class. After the refinement, each column correspond to an ind
 
 This repository contains a refined annotation file for the Stanford Cars [1] dataset, characterized by an increased 
 class granularity. In its original form, the dataset contained 196 classes, with each class denoting a different car model. 
-After the refinement process, the dataset now contains 1,600 classes, with each class representing a unique combination 
+After the refinement process, the dataset now contains 1,288 classes, with each class representing a unique combination 
 of car model and color, as shown in Figure 1.
 
 The refinement process involved leveraging the color information inherent in the images. Accordingly, various car color 
